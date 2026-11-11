@@ -58,6 +58,7 @@ Copy `.env.example` to `.env.local`. Nothing is required for demo mode.
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAP_ID` | Maps JavaScript API | yes (restrict by referrer) |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_*` | Subscriptions | no |
 | `OSRM_URL`, `WEATHER_PROVIDER` | Fallback providers; set to `off` to disable | no |
+| `FREE_ACCESS_PLAN` | `plus` or `pro`: gives every user that plan while Stripe is not configured | no |
 | `SESSION_SECRET` | Demo-mode session cookie signing | no |
 
 ## Configure Supabase

@@ -1,6 +1,7 @@
 /** Server-side entitlement checks. The client never decides what a plan allows. */
 import { asService } from "@/lib/db";
 import { PLANS, type PlanId, type PlanLimits } from "@/lib/plans";
+import { integrations } from "@/lib/env";
 
 export type Entitlements = { plan: PlanId; limits: PlanLimits; via: "subscription" | "trip_pass" | "free"; periodEnd: Date | null; cancelAtPeriodEnd: boolean; interval: string | null; hasCustomer: boolean };
 
@@ -12,7 +13,10 @@ const ACTIVE = new Set(["active", "trialing", "past_due"]);
 
 export async function getEntitlements(userId: string): Promise<Entitlements> {
   const [s] = await asService((q) => q("select * from subscriptions where user_id = $1", [userId]));
-  let plan: PlanId = "free";
+  // While payments are switched off (no Stripe), the operator can choose what everyone gets,
+  // e.g. FREE_ACCESS_PLAN=pro to run the whole app free of charge. Ignored once Stripe is configured.
+  const gift = process.env.FREE_ACCESS_PLAN;
+  let plan: PlanId = !integrations().stripe && (gift === "plus" || gift === "pro") ? gift : "free";
   let via: Entitlements["via"] = "free";
   if (s && s.plan !== "free" && ACTIVE.has(s.status) && (!s.current_period_end || new Date(s.current_period_end) > new Date())) {
     plan = s.plan;

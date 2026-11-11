@@ -74,7 +74,10 @@ async function pgliteDriver(): Promise<Driver> {
 
 async function postgresDriver(url: string): Promise<Driver> {
   const { default: postgres } = await import("postgres");
+  const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
   const sql = postgres(url, {
+    // Hosted Postgres (Supabase) expects TLS; a local database usually has none.
+    ssl: local || /sslmode=disable/.test(url) ? false : "require",
     max: Number(process.env.DATABASE_POOL_MAX || 5),
     prepare: false, // required for Supabase's transaction pooler
     onnotice: () => {},
