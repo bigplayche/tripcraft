@@ -11,7 +11,9 @@
     "test:rls": "PGLITE_DIR=memory tsx scripts/test-rls.ts",
     "typecheck": "tsc --noEmit",
     "test:e2e": "node e2e/journey.mjs",
-    "test:ai": "tsx scripts/test-ai-path.ts"
+    "test:ai": "tsx scripts/test-ai-path.ts",
+    "db:standalone-sql": "node scripts/build-standalone-sql.mjs",
+    "test:hosted": "node e2e/hosted.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.16",

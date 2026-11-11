@@ -72,10 +72,15 @@ async function pgliteDriver(): Promise<Driver> {
   return driver;
 }
 
+const jsonText = (v: unknown) => (typeof v === "string" ? v : JSON.stringify(v));
+
 async function postgresDriver(url: string): Promise<Driver> {
   const { default: postgres } = await import("postgres");
   const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
-  const sql = postgres(url, {
+  // Providers append options such as ?sslmode=require&channel_binding=require. The driver would
+  // forward unknown ones to the server as settings and the connection could be refused, so drop
+  // them and configure TLS explicitly below.
+  const sql = postgres(url.split("?")[0], {
     // Hosted Postgres (Supabase) expects TLS; a local database usually has none.
     ssl: local || /sslmode=disable/.test(url) ? false : "require",
     max: Number(process.env.DATABASE_POOL_MAX || 5),
@@ -84,6 +89,10 @@ async function postgresDriver(url: string): Promise<Driver> {
     types: {
       numeric: { to: 1700, from: [1700], serialize: (v: number) => String(v), parse: (v: string) => parseFloat(v) },
       date: { to: 1082, from: [1082], serialize: (v: string) => v, parse: (v: string) => v },
+      // Queries pass JSON as an already-encoded string ($n::jsonb). Without these the driver would
+      // encode that string a second time and store a JSON string instead of an array/object.
+      json: { to: 114, from: [114], serialize: jsonText, parse: (v: string) => JSON.parse(v) },
+      jsonb: { to: 3802, from: [3802], serialize: jsonText, parse: (v: string) => JSON.parse(v) },
     },
   });
   return {

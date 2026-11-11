@@ -86,7 +86,7 @@ export function Documents({ tripId, docs, canUpload, canEdit, me, isOwner }: { t
       {!canEdit ? null : canUpload ? (
         <form key={key} className="grid gap-3 sm:grid-cols-[1fr_9rem_9rem_auto] sm:items-end" action={(f) => run(() => uploadDocument(f), { success: "Document uploaded", onDone: () => setKey(key + 1) })}>
           <input type="hidden" name="tripId" value={tripId} />
-          <Field label="File (PDF or image, up to 10 MB)"><Input name="file" type="file" required accept="application/pdf,image/png,image/jpeg,image/webp,text/plain" className="py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-muted file:px-3 file:py-1 file:text-sm" /></Field>
+          <Field label="File (PDF or image, up to 4 MB)"><Input name="file" type="file" required accept="application/pdf,image/png,image/jpeg,image/webp,text/plain" className="py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-muted file:px-3 file:py-1 file:text-sm" /></Field>
           <Field label="Type"><Select name="docType"><option value="booking">Booking</option><option value="ticket">Ticket</option><option value="insurance">Insurance</option><option value="id">ID</option><option value="other">Other</option></Select></Field>
           <Field label="Confirmation #"><Input name="code" maxLength={60} placeholder="Optional" /></Field>
           <Button type="submit" disabled={pending}>{pending ? <Spinner /> : <Upload className="h-4 w-4" />}Upload</Button>

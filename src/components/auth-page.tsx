@@ -4,7 +4,7 @@ import { AuthForm } from "./auth-form";
 import { Logo } from "./ui";
 import { DestinationImage } from "./destination-image";
 import { getSessionUser } from "@/lib/auth/session";
-import { isDemoMode } from "@/lib/env";
+import { usesBuiltInAuth } from "@/lib/env";
 import { DESTINATIONS } from "@/lib/catalog";
 
 export async function AuthPage({ mode, searchParams }: { mode: "login" | "signup"; searchParams: Promise<{ next?: string }> }) {
@@ -17,7 +17,7 @@ export async function AuthPage({ mode, searchParams }: { mode: "login" | "signup
       <div className="flex flex-col px-6 py-8 sm:px-12">
         <Link href="/"><Logo /></Link>
         <div className="flex flex-1 items-center justify-center py-10">
-          <AuthForm mode={mode} next={next} oauth={!isDemoMode()} />
+          <AuthForm mode={mode} next={next} oauth={!usesBuiltInAuth()} />
         </div>
       </div>
       <div className="relative hidden lg:block">

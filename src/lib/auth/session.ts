@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { isDemoMode } from "@/lib/env";
+import { usesBuiltInAuth } from "@/lib/env";
 import { withUser } from "@/lib/db";
 import { DEV_COOKIE, verifySessionToken } from "./dev";
 import { supabaseServer } from "@/lib/supabase/server";
@@ -11,7 +11,7 @@ export type SessionUser = { id: string; email: string; full_name: string | null;
 /** The signed-in user for this request, verified server-side. Never trust client-supplied ids. */
 export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   let id: string | null = null;
-  if (isDemoMode()) {
+  if (usesBuiltInAuth()) {
     id = verifySessionToken((await cookies()).get(DEV_COOKIE)?.value);
   } else {
     const supabase = await supabaseServer();

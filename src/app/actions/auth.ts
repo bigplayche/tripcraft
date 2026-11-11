@@ -2,7 +2,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { isDemoMode, appUrl } from "@/lib/env";
+import { usesBuiltInAuth, appUrl } from "@/lib/env";
 import { createSessionToken, DEV_COOKIE, devSignIn, devSignUp } from "@/lib/auth/dev";
 import { supabaseServer } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
@@ -29,7 +29,7 @@ export async function signUp(_: AuthState, form: FormData): Promise<AuthState> {
   // React resets the form after an action, so echo the non-secret fields back.
   const echo = { email: String(form.get("email") ?? "").slice(0, 200), name };
   if (!parsed.success) return { ...echo, error: "Enter a valid email and a password of at least 8 characters." };
-  if (isDemoMode()) {
+  if (usesBuiltInAuth()) {
     const r = await devSignUp(parsed.data.email, parsed.data.password, name);
     if ("error" in r) return { ...echo, error: r.error };
     await setDevSession(r.userId);
@@ -47,7 +47,7 @@ export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
   const parsed = Creds.safeParse({ email: form.get("email"), password: form.get("password") });
   const echo = { email: String(form.get("email") ?? "").slice(0, 200) };
   if (!parsed.success) return { ...echo, error: "Incorrect email or password." };
-  if (isDemoMode()) {
+  if (usesBuiltInAuth()) {
     const r = await devSignIn(parsed.data.email, parsed.data.password);
     if ("error" in r) return { ...echo, error: r.error };
     await setDevSession(r.userId);
@@ -59,7 +59,7 @@ export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
 }
 
 export async function signOut() {
-  if (isDemoMode()) (await cookies()).delete(DEV_COOKIE);
+  if (usesBuiltInAuth()) (await cookies()).delete(DEV_COOKIE);
   else await (await supabaseServer()).auth.signOut();
   redirect("/");
 }

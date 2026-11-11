@@ -24,7 +24,9 @@ export default async function Profile({ searchParams }: PageProps<"/profile">) {
   ]);
   const i = integrations();
   const rows: [string, boolean, string][] = [
-    ["Supabase (auth, database, storage)", i.supabase, "Local embedded database and email/password sign-in"],
+    i.supabase || isDemoMode()
+      ? ["Supabase (auth, database, storage)", i.supabase, "Local embedded database and email/password sign-in"]
+      : ["Hosted Postgres database with built-in sign-in", true, ""],
     ["OpenAI (itineraries, concierge, discovery)", i.openai, "Sample planner from the curated catalogue; rule-based concierge"],
     ["Google Places & Routes (verified places, travel times)", i.googleServer, "Unverified locations; driving times via OSRM where reachable"],
     ["Google Maps display", i.googleBrowser, "OpenStreetMap map"],

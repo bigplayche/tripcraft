@@ -1,7 +1,7 @@
 -- Supabase-only: private bucket for travel documents. (Skipped by the local PGlite fallback.)
 -- Objects are stored at  <trip_id>/<uuid>-<filename>  and are only reachable by trip members.
 insert into storage.buckets (id, name, public, file_size_limit)
-values ('trip-documents', 'trip-documents', false, 10485760)
+values ('trip-documents', 'trip-documents', false, 4194304)
 on conflict (id) do update set public = false;
 
 create policy "trip members read documents" on storage.objects for select to authenticated

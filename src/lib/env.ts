@@ -13,9 +13,18 @@ export function integrations() {
   };
 }
 
-/** Demo mode = no Supabase project: local embedded Postgres + local email/password auth. */
-export function isDemoMode() {
+/**
+ * Without a Supabase project the app uses its own email/password sign-in and stores uploaded
+ * files in the database. This is true both in local demo mode and when self-hosting on any
+ * plain Postgres (for example Neon).
+ */
+export function usesBuiltInAuth() {
   return !integrations().supabase;
+}
+
+/** Demo mode = nothing configured at all: embedded database on local disk. Development only. */
+export function isDemoMode() {
+  return !integrations().supabase && !integrations().database;
 }
 
 export function appUrl() {

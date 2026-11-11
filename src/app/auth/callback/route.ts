@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isDemoMode } from "@/lib/env";
+import { usesBuiltInAuth } from "@/lib/env";
 import { supabaseServer } from "@/lib/supabase/server";
 import { withUser } from "@/lib/db";
 
@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const code = url.searchParams.get("code");
   const next = url.searchParams.get("next");
   const dest = next?.startsWith("/") && !next.startsWith("//") ? next : "/home";
-  if (isDemoMode() || !code) return NextResponse.redirect(new URL("/login?error=oauth", url.origin));
+  if (usesBuiltInAuth() || !code) return NextResponse.redirect(new URL("/login?error=oauth", url.origin));
   const supabase = await supabaseServer();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error || !data.user) return NextResponse.redirect(new URL("/login?error=oauth", url.origin));

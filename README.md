@@ -71,6 +71,16 @@ Copy `.env.example` to `.env.local`. Nothing is required for demo mode.
 
 How data access works: the server connects with `DATABASE_URL` and runs every user query in a transaction as the `authenticated` role with the user's id in `request.jwt.claims`, the same mechanism Supabase's own API uses. Row Level Security therefore applies to every query the app makes, and equally to any direct Supabase client. Privileged writes (billing, AI metering) use a separate service path.
 
+## Host it without Supabase (Neon or any Postgres)
+
+TripCraft also runs on a plain Postgres database with its own email/password sign-in. Set only `DATABASE_URL`:
+
+1. Create a free database at https://neon.tech and copy its **pooled** connection string.
+2. Open the provider's SQL editor, paste the whole of `supabase/standalone-setup.sql` and run it once.
+3. Deploy with `DATABASE_URL` set (and optionally `FREE_ACCESS_PLAN=pro`).
+
+In this mode uploaded documents are stored in a server-only database table, sessions are signed with a key derived from `DATABASE_URL` (or `SESSION_SECRET` if set), and Row Level Security is enforced exactly as on Supabase. Not available without Supabase: Google/Apple sign-in, password reset and email verification. `supabase/standalone-setup.sql` is generated; after changing a migration run `npm run db:standalone-sql`.
+
 ### Database migrations
 
 Migrations live in `supabase/migrations`. See [docs/SCHEMA.md](docs/SCHEMA.md).
@@ -120,10 +130,11 @@ Before production: replace the in-memory rate limiter (`src/lib/rate-limit.ts`) 
 ```bash
 npm run typecheck
 npm run lint
-npm run test:rls   # 27 Row Level Security checks (also runs against DATABASE_URL)
+npm run test:rls   # 28 Row Level Security checks (also runs against DATABASE_URL)
 npm run test:ai    # OpenAI code path against a local mock endpoint
 npm run build && npx next start -p 3100 &
 npm run test:e2e   # full browser journey; needs Playwright
+npm run test:hosted # smoke test for plain-Postgres hosting (server started with DATABASE_URL)
 ```
 
 ## Project layout

@@ -18,20 +18,26 @@ export function AuthForm({ mode, next, oauth }: { mode: "login" | "signup"; next
       <h1 className="display text-3xl">{mode === "login" ? "Welcome back" : "Start planning"}</h1>
       <p className="mt-2 text-ink-soft">{mode === "login" ? "Sign in to pick up where you left off." : "Create a free account. No card required."}</p>
 
-      <div className="mt-7 grid gap-2">
-        {(["google", "apple"] as const).map((p) => (
-          <button key={p} type="button" disabled={!oauth} onClick={() => social(p)} className={buttonClass({ variant: "outline" }, "w-full capitalize")}>
-            Continue with {p}
-          </button>
-        ))}
-        {!oauth && <p className="text-center text-xs text-ink-faint">Google and Apple sign-in need a Supabase project (not configured in demo mode).</p>}
-        {oauthError && <p className="text-center text-xs text-danger">{oauthError}</p>}
-      </div>
-      <div className="my-6 flex items-center gap-3 text-xs text-ink-faint">
-        <span className="h-px flex-1 bg-line" />
-        or with email
-        <span className="h-px flex-1 bg-line" />
-      </div>
+      {/* Google and Apple sign-in are provided by Supabase Auth; hidden when it isn't configured. */}
+      {oauth ? (
+        <>
+          <div className="mt-7 grid gap-2">
+            {(["google", "apple"] as const).map((p) => (
+              <button key={p} type="button" onClick={() => social(p)} className={buttonClass({ variant: "outline" }, "w-full capitalize")}>
+                Continue with {p}
+              </button>
+            ))}
+            {oauthError && <p className="text-center text-xs text-danger">{oauthError}</p>}
+          </div>
+          <div className="my-6 flex items-center gap-3 text-xs text-ink-faint">
+            <span className="h-px flex-1 bg-line" />
+            or with email
+            <span className="h-px flex-1 bg-line" />
+          </div>
+        </>
+      ) : (
+        <div className="mt-7" />
+      )}
 
       <form action={action} className="grid gap-4">
         <input type="hidden" name="next" value={next} />

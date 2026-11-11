@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   // TripCraft is almost entirely per-user, request-time UI, so we use the
   // classic dynamic rendering model instead of Cache Components.
   serverExternalPackages: ["@electric-sql/pglite", "postgres"],
-  experimental: { serverActions: { bodySizeLimit: "12mb" } },
+  experimental: { serverActions: { bodySizeLimit: "5mb" } },
   turbopack: {
     rules: {
       "*.css": { loaders: ["@tailwindcss/turbopack"], as: "*.css" },

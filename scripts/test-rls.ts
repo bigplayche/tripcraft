@@ -18,6 +18,11 @@ async function main() {
   const tripId = await withUser(alice, async (q) => (await q("insert into trips (owner_id,title,destination_name,start_date,end_date,budget) values ($1,'T','Lisbon','2027-05-01','2027-05-05',2000) returning id", [alice]))[0].id as string);
   check("owner becomes a trip member", (await withUser(alice, (q) => q("select role from trip_members where trip_id=$1", [tripId])))[0]?.role === "owner");
   check("date column parses as string, numeric as number", await withUser(alice, async (q) => { const [t] = await q("select start_date, budget from trips where id=$1", [tripId]); return t.start_date === "2027-05-01" && t.budget === 2000; }));
+  check("JSON parameters round-trip as arrays, not strings", await withUser(alice, async (q) => {
+    await q("update trips set packing_list = $2::jsonb, emergency_contacts = $3::jsonb where id = $1", [tripId, JSON.stringify([{ id: "p1", label: "Passport", done: false }]), JSON.stringify([])]);
+    const [t] = await q("select packing_list, emergency_contacts from trips where id = $1", [tripId]);
+    return Array.isArray(t.packing_list) && t.packing_list[0]?.label === "Passport" && Array.isArray(t.emergency_contacts);
+  }));
   check("stranger cannot see the trip", (await withUser(bob, (q) => q("select 1 from trips where id=$1", [tripId]))).length === 0);
   check("user cannot create a trip for someone else", await denied(() => withUser(bob, (q) => q("insert into trips (owner_id,title,destination_name,start_date,end_date,budget) values ($1,'x','x','2027-01-01','2027-01-02',1)", [alice]))));
   check("stranger cannot add an expense", await denied(() => withUser(bob, (q) => q("insert into trip_expenses (trip_id,created_by,category,description,amount) values ($1,$2,'food','x',1)", [tripId, bob]))));

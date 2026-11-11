@@ -12,6 +12,9 @@ const MAX_AGE = 60 * 60 * 24 * 14;
 
 function secret() {
   if (process.env.SESSION_SECRET) return process.env.SESSION_SECRET;
+  // Hosted without Supabase: derive a stable secret from the database URL (which contains the
+  // database password), so every serverless instance signs sessions identically.
+  if (process.env.DATABASE_URL) return crypto.createHash("sha256").update(`tripcraft-session:${process.env.DATABASE_URL}`).digest("hex");
   const file = path.join(process.cwd(), ".data", "session-secret");
   try {
     return fs.readFileSync(file, "utf8");

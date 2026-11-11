@@ -10,7 +10,8 @@ import { getForecast } from "@/lib/weather";
 import { rateLimit } from "@/lib/rate-limit";
 
 const ALLOWED = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp", "image/heic", "text/plain"]);
-const MAX_BYTES = 10 * 1024 * 1024;
+// Kept under the request-size limit of common serverless hosts.
+const MAX_BYTES = 4 * 1024 * 1024;
 
 export async function savePacking(tripId: string, list: { id: string; label: string; done: boolean }[]) {
   return act(async (u) => {
@@ -31,7 +32,7 @@ export async function uploadDocument(form: FormData) {
     const tripId = z.string().uuid().parse(form.get("tripId"));
     const file = form.get("file");
     if (!(file instanceof File) || !file.size) return no("Choose a file to upload.");
-    if (file.size > MAX_BYTES) return no("Files can be up to 10 MB.");
+    if (file.size > MAX_BYTES) return no("Files can be up to 4 MB.");
     if (!ALLOWED.has(file.type)) return no("Upload a PDF, image or text file.");
     if (!rateLimit(`upload:${u.id}`, 20, 60_000).ok) return no("Too many uploads. Try again in a minute.");
     if (!(await getEntitlements(u.id)).limits.documents) throw new LimitError("Private travel documents are a Traveler Plus feature.");
